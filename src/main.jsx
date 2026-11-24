@@ -1,14 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-
-function App() {
-  return (
-    <main>
-      <h1>RepoGuard</h1>
-      <p>AI-powered code review and security analysis</p>
-    </main>
-  );
-}
+import App from './App.jsx';
 
 const rootElement = document.getElementById('root');
 
