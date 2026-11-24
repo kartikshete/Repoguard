@@ -6,6 +6,7 @@ import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
+import { connectToDatabase } from './config/database.js';
 
 const port = Number(process.env.PORT ?? 5000);
 const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
@@ -72,9 +73,15 @@ const isMainModule =
   process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMainModule) {
-  server.listen(port, () => {
-    console.log(`RepoGuard API listening on port ${port}.`);
-  });
+  try {
+    await connectToDatabase();
+    server.listen(port, () => {
+      console.log(`RepoGuard API listening on port ${port}.`);
+    });
+  } catch (error) {
+    console.error(`RepoGuard API startup failed: ${error.message}`);
+    process.exitCode = 1;
+  }
 }
 
 export { app, server };
