@@ -158,4 +158,31 @@ describe('GitHub OAuth routes', () => {
       },
     });
   });
+
+  it('clears the session cookie for a same-origin logout', async () => {
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Origin', 'http://localhost:5173')
+      .set('Cookie', 'repoguard_session=expired-session')
+      .expect(204);
+    const clearedSessionCookie = response.headers['set-cookie'].find((cookie) =>
+      cookie.startsWith('repoguard_session='),
+    );
+
+    expect(clearedSessionCookie).toMatch(/Max-Age=0/i);
+    expect(clearedSessionCookie).toMatch(/HttpOnly/i);
+    expect(clearedSessionCookie).toMatch(/Path=\/api/i);
+    expect(response.headers['cache-control']).toBe('no-store');
+  });
+
+  it('rejects logout requests from an untrusted Origin', async () => {
+    const response = await request(app)
+      .post('/api/auth/logout')
+      .set('Origin', 'https://untrusted.example')
+      .set('Cookie', 'repoguard_session=expired-session')
+      .expect(403);
+
+    expect(response.body).toEqual({ error: 'Cross-origin request blocked.' });
+    expect(response.headers['set-cookie']).toBeUndefined();
+  });
 });
