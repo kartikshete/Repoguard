@@ -1,22 +1,36 @@
 import {
   afterAll,
   beforeAll,
+  beforeEach,
   describe,
   expect,
   it,
+  jest,
 } from '@jest/globals';
+import { randomBytes } from 'node:crypto';
 import request from 'supertest';
 import { createOAuthState } from '../auth/oauthState.js';
+import { createSessionToken } from '../auth/sessionToken.js';
+
+const findByIdMock = jest.fn();
+jest.unstable_mockModule('../models/User.js', () => ({
+  default: {
+    findById: findByIdMock,
+    findOneAndUpdate: jest.fn(),
+  },
+}));
 
 const environmentKeys = [
   'CLIENT_ORIGIN',
   'GITHUB_CALLBACK_URL',
   'GITHUB_CLIENT_ID',
+  'JWT_SECRET',
   'PORT',
 ];
 const originalEnvironment = Object.fromEntries(
   environmentKeys.map((key) => [key, process.env[key]]),
 );
+const testSecret = randomBytes(32).toString('base64url');
 
 let app;
 
@@ -25,6 +39,7 @@ beforeAll(async () => {
   process.env.GITHUB_CALLBACK_URL =
     'http://localhost:5000/api/auth/github/callback';
   process.env.GITHUB_CLIENT_ID = 'repoguard-test-client';
+  process.env.JWT_SECRET = testSecret;
   process.env.PORT = '5000';
 
   ({ app } = await import('../server.js'));
@@ -38,6 +53,10 @@ afterAll(() => {
       process.env[key] = value;
     }
   }
+});
+
+beforeEach(() => {
+  findByIdMock.mockReset();
 });
 
 describe('GitHub OAuth routes', () => {
@@ -97,5 +116,46 @@ describe('GitHub OAuth routes', () => {
     expect(response.headers['set-cookie'].some((cookie) =>
       /Max-Age=0/i.test(cookie),
     )).toBe(true);
+  });
+
+  it('requires authentication before loading the current user', async () => {
+    const response = await request(app).get('/api/auth/me').expect(401);
+
+    expect(response.body).toEqual({ error: 'Authentication required.' });
+    expect(findByIdMock).not.toHaveBeenCalled();
+  });
+
+  it('returns only the authenticated user profile fields', async () => {
+    const user = {
+      _id: 'user-123',
+      username: 'repoguard-user',
+      displayName: 'Repo Guard User',
+      avatarUrl: 'https://avatars.example/user.png',
+    };
+    const leanQuery = {
+      lean: jest.fn().mockResolvedValue(user),
+    };
+    const selectQuery = {
+      select: jest.fn().mockReturnValue(leanQuery),
+    };
+    findByIdMock.mockReturnValue(selectQuery);
+    const sessionToken = createSessionToken('user-123', testSecret);
+    const response = await request(app)
+      .get('/api/auth/me')
+      .set('Cookie', `repoguard_session=${sessionToken}`)
+      .expect(200);
+
+    expect(findByIdMock).toHaveBeenCalledWith('user-123');
+    expect(selectQuery.select).toHaveBeenCalledWith(
+      '_id username displayName avatarUrl',
+    );
+    expect(response.body).toEqual({
+      user: {
+        id: 'user-123',
+        username: 'repoguard-user',
+        displayName: 'Repo Guard User',
+        avatarUrl: 'https://avatars.example/user.png',
+      },
+    });
   });
 });
