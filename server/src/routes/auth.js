@@ -271,4 +271,23 @@ router.get('/me', requireAuth, async (request, response, next) => {
   }
 });
 
+router.post('/logout', (request, response) => {
+  response.set('Cache-Control', 'no-store');
+
+  const { clientOrigin, nodeEnv } = loadServerEnvironment();
+
+  if (request.get('origin') !== clientOrigin) {
+    return response.status(403).json({ error: 'Cross-origin request blocked.' });
+  }
+
+  response.clearCookie(SESSION_COOKIE, {
+    httpOnly: true,
+    path: '/api',
+    sameSite: 'lax',
+    secure: nodeEnv === 'production',
+  });
+
+  return response.status(204).end();
+});
+
 export default router;
