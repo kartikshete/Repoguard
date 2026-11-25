@@ -2,6 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { Router } from 'express';
 import User from '../models/User.js';
 import { createOAuthState, isValidOAuthState } from '../auth/oauthState.js';
+import { requireAuth } from '../auth/requireAuth.js';
 import { createSessionToken } from '../auth/sessionToken.js';
 import { loadServerEnvironment } from '../config/environment.js';
 
@@ -242,6 +243,29 @@ router.get('/github/callback', async (request, response, next) => {
       303,
       new URL('/?auth=connected', clientOrigin).toString(),
     );
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get('/me', requireAuth, async (request, response, next) => {
+  try {
+    const user = await User.findById(request.auth.userId)
+      .select('_id username displayName avatarUrl')
+      .lean();
+
+    if (!user) {
+      return response.status(401).json({ error: 'Session is no longer valid.' });
+    }
+
+    return response.status(200).json({
+      user: {
+        id: user._id.toString(),
+        username: user.username,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
+      },
+    });
   } catch (error) {
     return next(error);
   }
