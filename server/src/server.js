@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { connectToDatabase } from './config/database.js';
 import { loadServerEnvironment } from './config/environment.js';
 import authRouter from './routes/auth.js';
+import repositoriesRouter from './routes/repositories.js';
 
 const { port, clientOrigin } = loadServerEnvironment();
 
@@ -33,6 +34,7 @@ app.use(
 );
 app.use(express.json({ limit: '100kb' }));
 app.use('/api/auth', authRouter);
+app.use('/api/repositories', repositoriesRouter);
 
 app.get('/api/health', (request, response) => {
   response.status(200).json({ status: 'ok' });
