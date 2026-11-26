@@ -106,6 +106,76 @@ body {
   line-height: 1.7;
 }
 
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.user-avatar {
+  display: block;
+  width: 3.25rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(158 184 219 / 30%);
+  border-radius: 50%;
+  background: #17253a;
+  object-fit: cover;
+}
+
+.welcome-panel .user-profile .user-handle {
+  margin: 0;
+  color: #aab8cc;
+  font-weight: 600;
+}
+
+.auth-button {
+  display: inline-flex;
+  min-height: 2.9rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.15rem;
+  border: 1px solid rgb(94 234 212 / 35%);
+  border-radius: 0.75rem;
+  background: #2dd4bf;
+  color: #07151b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.auth-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #5eead4;
+}
+
+.auth-button:focus-visible {
+  outline: 3px solid #f8fbff;
+  outline-offset: 3px;
+}
+
+.auth-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.welcome-panel .app-feedback {
+  max-width: none;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgb(248 113 113 / 35%);
+  border-radius: 0.75rem;
+  background: rgb(127 29 29 / 20%);
+  color: #fecaca;
+}
+
 @media (max-width: 480px) {
   .app-shell {
     width: min(100% - 2rem, 76rem);
@@ -118,5 +188,19 @@ body {
 
   .welcome-panel {
     border-radius: 1rem;
+  }
+
+  .auth-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-button {
+    transition: none;
+  }
+
+  .auth-button:hover:not(:disabled) {
+    transform: none;
   }
 }
