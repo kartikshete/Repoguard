@@ -113,6 +113,65 @@ body {
   margin-top: 1.5rem;
 }
 
+.repository-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgb(158 184 219 / 16%);
+}
+
+.welcome-panel .repository-section > h2 {
+  max-width: none;
+  font-size: clamp(1.35rem, 2.6vw, 1.8rem);
+  letter-spacing: -0.03em;
+}
+
+.repository-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 0.9rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.repository-card {
+  min-width: 0;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid rgb(158 184 219 / 18%);
+  border-radius: 1rem;
+  background: rgb(8 16 29 / 58%);
+  overflow-wrap: anywhere;
+}
+
+.repository-card h3 {
+  margin: 0;
+  color: #e8f0fc;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.repository-card h3 a {
+  color: #7dd3c7;
+  text-decoration-color: rgb(125 211 199 / 45%);
+  text-underline-offset: 0.2em;
+}
+
+.repository-card h3 a:hover {
+  color: #99f6e4;
+  text-decoration-color: currentColor;
+}
+
+.repository-card h3 a:focus-visible {
+  border-radius: 0.15rem;
+  outline: 3px solid #f8fbff;
+  outline-offset: 3px;
+}
+
+.welcome-panel .repository-card p {
+  margin-top: 0.65rem;
+  font-size: 0.9rem;
+}
+
 .user-avatar {
   display: block;
   width: 3.25rem;
@@ -188,6 +247,15 @@ body {
 
   .welcome-panel {
     border-radius: 1rem;
+  }
+
+  .repository-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .repository-card {
+    padding: 1rem;
   }
 
   .auth-button {
